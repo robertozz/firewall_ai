@@ -1,0 +1,16 @@
+services:
+  firewall_ai:
+    build:
+      context: .
+    container_name: firewall_ai
+    network_mode: "host"
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./rules:/app/rules   # nuovo volume per esportare le regole
+
+    environment:
+      TZ: Europe/Rome

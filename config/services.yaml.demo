@@ -1,0 +1,4 @@
+allowed_services:
+- name: ssh
+  port: 22
+  protocol: tcp

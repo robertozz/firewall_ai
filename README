@@ -1,0 +1,76 @@
+# 🔥 firewall_ai – Gestione dinamica di nftables via Docker
+
+Automatizza la configurazione del firewall con `nftables` leggendo da un file YAML e notificando via Telegram solo eventi significativi (errori, aggiunte, rimozioni). Pensato per ambienti self-hosted con Docker.
+
+---
+
+## 🚀 Avvio rapido
+
+```bash
+git clone https://github.com/tuo-utente/firewall_ai.git
+cd firewall_ai
+sudo docker compose up -d --build
+
+🛠️ Requisiti
+Docker (non in modalità rootless)
+
+network_mode: host e cap_add: NET_ADMIN abilitati nel docker-compose.yml
+
+nftables installato sull’host
+
+Bot Telegram configurato in config/telegram.yaml
+
+📦 Struttura
+
+firewall_ai/
+├── config/
+│   └── services.yaml         # Elenco dei servizi da autorizzare
+├── logs/
+│   └── firewall.log.json     # Log strutturati
+├── rules/
+│   └── firewall.rules        # Dump regole nftables
+├── utils/
+│   └── telegram_utils.py     # Notifiche Telegram
+├── firewall_ai.py            # Script principale
+└── docker-compose.yml        # Configurazione container
+
+⚙️ Comandi utili
+Azione	Comando
+Avvia container		sudo docker compose up -d --build
+Riavvia container	sudo docker compose restart firewall_ai
+Verifica regole		sudo nft list ruleset
+Verifica log		sudo docker logs -f firewall_ai
+Esegui manualmente	sudo python3 firewall_ai.py
+
+Nel Makefile trovi
+# Makefile per gestione agente firewall AI
+
+run:
+        @echo "▶️ Avvio agente firewall..."
+        python3 firewall_ai.py
+
+test-telegram:
+        @echo "📡 Test notifica Telegram..."
+        python3 test_notify.py --html
+
+html:
+        @echo "🧾 Conversione log in HTML..."
+        python3 utils/telegram_utils.py --html
+
+clean:
+        @echo "🧹 Pulizia log e HTML..."
+        rm -f logs/firewall.log logs/firewall.html
+
+📬 Notifiche Telegram
+Solo per errori, aggiunte o rimozioni
+
+Raggruppate ogni 5 minuti
+
+Formattate in MarkdownV2
+
+🔐 Persistenza regole
+Per mantenere le regole dopo reboot dell’host:
+
+bash
+sudo cp rules/firewall.rules /etc/nftables.conf
+sudo systemctl enable nftables

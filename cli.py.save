@@ -1,0 +1,89 @@
+"""
+CLI e orchestrazione principale.
+Si occupa di:
+- parsing argomenti
+- controlli prerequisiti
+- generazione file rules
+- assicurare table/chain/sets
+- sincronizzare servizi (aggiungere elementi ai set)
+- flush notifiche
+"""
+import argparse
+import sys
+from pathlib import Path
+
+from config import DEFAULT_BASE_DIR, load_services
+from rules_generator import ensure_rules_file_from_services
+from nft_utils import ensure_table_chains_sets, check_nft_available, check_net_admin, flush_rules
+from apply_rules import apply_rule
+
+try:
+    import telegram_utils
+    notify = getattr(telegram_utils, "notify_markdown", None)
+except Exception:
+    telegram_utils = None
+    notify = None
+
+def run_cli():
+    parser = argparse.ArgumentParser(prog="firewall_ai")
+    parser.add_argument("--base-dir", default=DEFAULT_BASE_DIR, help="Base dir del progetto")
+    parser.add_argument("--flush", action="store_true", help="Svuota le regole prima di applicare")
+    parser.add_argument("--dry-run", action="store_true", help="Simula l'applicazione delle regole")
+    args = parser.parse_args()
+
+    base = Path(args.base_dir).expanduser().resolve()
+
+    # prerequisiti
+    try:
+        check_nft_available()
+    except Exception as e:
+        print(f"ERR: nft non disponibile: {e}", file=sys.stderr)
+        sys.exit(2)
+
+    try:
+        check_net_admin()
+    except Exception as e:
+        print(f"ERR: permessi NET_ADMIN mancanti: {e}", file=sys.stderr)
+        sys.exit(3)
+
+    # genera rules file (idempotente)
+    ok = ensure_rules_file_from_services(str(base))
+    if not ok:
+        print("WARN: generazione rules file fallita, procedo comunque a tentativi", file=sys.stderr)
+
+    # assicurati table/chain/sets e regole che usano i set
+    try:
+        ensure_table_chains_sets()
+    except Exception as e:
+        print(f"ERR: non posso creare table/chain/sets: {e}", file=sys.stderr)
+        sys.exit(4)
+
+    # opzionale flush
+    if args.flush:
+        try:
+            flush_rules()
+        except Exception as e:
+            print(f"WARN: flush rules fallito: {e}", file=sys.stderr)
+
+    # carica services e applica (aggiunge solo elementi mancanti ai set)
+    services = load_services(str(base))
+    if args.dry_run:
+        print("DRY RUN: non verranno modificate regole. Simulazione in corso...")
+
+    for svc in services:
+        try:
+            apply_rule(svc, dry_run=args.dry_run)
+        except Exception as e:
+            print(f"WARN: apply_rule fallita per {svc.get('name','?')}: {e}", file=sys.stderr)
+
+# flush notifiche Telegram (se il modulo fornisce la funzione)
+    if telegram_utils is not None:
+        try:
+            # chiamiamo flush_queue solo se esiste nella versione corrente del modulo
+            if hasattr(telegram_utils, "flush_queue"):
+                telegram_utils.flush_queue()
+            elif hasattr(telegram_utils, "flush"):  # fallback se ha nome diverso
+                telegram_utils.flush()
+        except Exception:
+            # non vogliamo che un problema nelle notifiche faccia fallire l'intero run
+            pass

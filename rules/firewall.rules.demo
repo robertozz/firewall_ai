@@ -1,0 +1,28 @@
+#!/usr/sbin/nft -f
+table inet filter {
+  set tcp_services {
+    type inet_service
+    flags interval
+    elements = { 22 }
+  }
+
+  set udp_services {
+    type inet_service
+    flags interval
+    elements = { }
+  }
+
+  chain input {
+    type filter hook input priority 0; policy drop;
+    ct state established,related accept
+    iif "lo" accept
+    ip saddr 192.168.1.0/24 accept
+
+    tcp dport @tcp_services accept
+    udp dport @udp_services accept
+    icmp type echo-request accept
+  }
+
+  chain forward { type filter hook forward priority 0; policy accept; }
+  chain output  { type filter hook output priority 0; policy accept; }
+}

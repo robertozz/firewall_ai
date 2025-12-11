@@ -1,0 +1,60 @@
+# Byte-compiled / Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+.envrc
+.python-version
+
+# Logs and runtime files
+log/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Caches
+.mypy_cache/
+.cache/
+pip-wheel-metadata/
+
+# Secrets and local config
+secrets/
+secrets.json
+*.key
+*.pem
+
+# Docker
+docker-compose.override.yml
+.env.*.local
+
+# Misc
+*.swp
+*.bak
+
+# Keep generated rules file under version control only if you want it tracked.
+# If you prefer to ignore generated rules, uncomment the next line:
+rules/firewall.rules
+config/telegram.json
+config/services.yaml
