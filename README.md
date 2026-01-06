@@ -29,6 +29,7 @@ allowed_services:
   - name: Immich
     port: 2283
     protocol: tcp
+```
 
 ## Requisiti
 - Python 3.x
@@ -41,5 +42,3 @@ python3 firewall_ai.py --dry-run
 
 ## Installazione systemd
 sudo ./scripts/install.sh
-
-

@@ -1,0 +1,2 @@
+# Permetti all'admin di eseguire lo script principale e nft senza password
+%firewalladmins ALL=(root) NOPASSWD: /usr/bin/python3 /home/roberto/docker-stacks/firewall_ai/firewall_ai.py, /usr/sbin/nft

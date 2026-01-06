@@ -1,0 +1,18 @@
+[Unit]
+Description=Firewall AI service
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root
+ExecStart=/usr/bin/python3 /home/%i/docker-stacks/firewall_ai/firewall_ai.py
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
