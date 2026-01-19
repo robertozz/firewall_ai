@@ -11,7 +11,10 @@ venv/
 
 # Logs and runtime files
 log/
+logs/
+utils/log/
 *.log
+*.html
 
 # OS files
 .DS_Store
@@ -49,12 +52,24 @@ secrets.json
 docker-compose.override.yml
 .env.*.local
 
-# Misc
-*.swp
+# Backups
 *.bak
+*.save
+*.swp
+*_backup_*/
 
 # Keep generated rules file under version control only if you want it tracked.
 # If you prefer to ignore generated rules, uncomment the next line:
 rules/firewall.rules
 config/telegram.json
 config/services.yaml
+
+# System install artifacts (non devono stare nel repo)
+etc/
+profile.d/
+sudoers.d/
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
